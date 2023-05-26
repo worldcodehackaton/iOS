@@ -5,7 +5,7 @@
 Login Screen\
 Categories Screen\
 Products Screen\
-Product Detail Screen\
+Product Detail Screen
 
 ### TODO: 
       брать данные для отображения с сервера и для взаимодействия с сервером для CRUD;
