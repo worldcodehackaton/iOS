@@ -7,38 +7,34 @@
 
 import UIKit
 
-class ProductsTableViewController: UITableViewController {
+protocol DataDelegate: AnyObject {
+    func sendProduct(_ product: Product)
+}
+
+final class ProductsTableViewController: UITableViewController {
 
     // MARK: - Public properties
-    var products: [Product]!
+    var storeId: Int!
+    var categoryId: Int!
+    var products: [Product] = []
     
     // MARK: - Life cycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let addButton = UIBarButtonItem(
-            barButtonSystemItem: .add,
-            target: self,
-            action: #selector(addButtonPressed)
-        )
-        
-        navigationItem.rightBarButtonItem = addButton
 
-    }
-    
-    @objc func addButtonPressed() {
-        present(AddProductViewController(), animated: true)
     }
 
     // MARK: - Prepare
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        guard let indexPath = tableView.indexPathForSelectedRow else { return }
-        
-        guard let detailsVC = segue.destination as? ProductsDetailViewController else  {
-            return
+        if let indexPath = tableView.indexPathForSelectedRow, let detailsVC = segue.destination as? ProductsDetailViewController {
+            
+            detailsVC.product = products[indexPath.row]
+        } else if let addVC = segue.destination as? AddProductWithCategoryViewController {
+            addVC.categoryId = categoryId
+            addVC.storeId = storeId
+            addVC.delegate = self
         }
-        
-        detailsVC.product = products[indexPath.row]
     }
 
 }
@@ -66,26 +62,64 @@ extension ProductsTableViewController {
     
     override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
 
-        let product = products[indexPath.row]
-        print(product.name)
-
-        let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { _, _, _ in
-            print("Delete action")
+        let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [weak self] _, _, _ in
+            self?.products.remove(at: indexPath.row)
+            tableView.deleteRows(at: [indexPath], with: .automatic)
         }
 
-        let editAction = UIContextualAction(style: .normal, title: "Edit") { _, _, isDone in
-            print("Edit action")
-            isDone(true)
-        }
-
-        let doneAction = UIContextualAction(style: .normal, title: "Done") { _, _, isDone in
-            print("Done action")
+        let editAction = UIContextualAction(style: .normal, title: "Edit") { [weak self] _, _, isDone in
+            self?.showAlert(title: "Изменение продукта", message: "", indexPath: indexPath)
             isDone(true)
         }
 
         editAction.backgroundColor = .orange
-        doneAction.backgroundColor = .systemGreen
         
-        return UISwipeActionsConfiguration(actions: [doneAction, editAction, deleteAction])
+        return UISwipeActionsConfiguration(actions: [editAction, deleteAction])
     }
+}
+
+extension ProductsTableViewController: DataDelegate {
+    func sendProduct(_ product: Product) {
+        products.append(product)
+        tableView.reloadData()
+    }
+    
+    func showAlert(title: String, message: String, indexPath: IndexPath) {
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        
+        alertController.addTextField { [weak self] in
+            $0.placeholder = "Введите название"
+            $0.text = self?.products[indexPath.row].name
+        }
+        
+        alertController.addTextField { [weak self] in
+            $0.placeholder = "Введите описание"
+            $0.text = self?.products[indexPath.row].description
+        }
+        
+        alertController.addTextField { [weak self] in
+            $0.placeholder = "Введите новую цену"
+            $0.text = self?.products[indexPath.row].price
+        }
+        
+        let cancelAction = UIAlertAction(title: "Отмена", style: .cancel)
+        let doneAction = UIAlertAction(title: "Ок", style: .default) { [weak self] _ in
+            if let name = alertController.textFields?[0].text, let description = alertController.textFields?[1].text, let price = alertController.textFields?[2].text {
+                self?.products[indexPath.row].name = name
+                self?.products[indexPath.row].description = description
+                self?.products[indexPath.row].price = price
+                
+                self?.tableView.reloadData()
+            }
+            
+        }
+        
+        alertController.addAction(cancelAction)
+        alertController.addAction(doneAction)
+        
+        present(alertController, animated: true, completion: nil)
+
+        
+    }
+    
 }

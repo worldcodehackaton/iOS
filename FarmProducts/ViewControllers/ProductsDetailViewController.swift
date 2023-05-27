@@ -7,7 +7,7 @@
 
 import UIKit
 
-class ProductsDetailViewController: UIViewController {
+final class ProductsDetailViewController: UIViewController {
 
     // MARK: - Public properties
     var product: Product!
@@ -24,7 +24,8 @@ class ProductsDetailViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        imageView.image = UIImage(named: "fish")
+        imageView.image = UIImage(named: "zlak")
+//        detailsLabel.text = product.details
         detailsLabel.text = product.details
     }
 }

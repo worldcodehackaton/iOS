@@ -7,36 +7,34 @@
 
 import UIKit
 
-class OrdersTableViewController: UITableViewController {
+final class OrdersTableViewController: UITableViewController {
 
-    var orders: Order!
+    var orders: [OrderData] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        print(orders.data[0].count)
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem
+        print(orders.count)
     }
 
     // MARK: - Table view data source
 
     override func numberOfSections(in tableView: UITableView) -> Int {
-        // #warning Incomplete implementation, return the number of sections
         return 1
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return orders.data.count
+        return orders.count
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "reuseIdentifier", for: indexPath)
+        
+        guard let cell = cell as? OrderTableViewCell else {
+            return UITableViewCell()
+        }
 
-        // Configure the cell...
+        cell.numberLabel.text = "Заказ № \(indexPath.row)"
+        cell.nameLabel.text = orders[indexPath.row].product.name
 
         return cell
     }

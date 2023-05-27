@@ -8,11 +8,20 @@
 import Foundation
 import Alamofire
 
+
+enum NetworkError: Error {
+    case invalidURL
+    case noData
+    case decodingError
+}
+
 enum Link {
     case product
     case order
     case delivery
     case category
+    case login
+    case register
     
     var url: URL? {
         switch self {
@@ -22,9 +31,31 @@ enum Link {
         case .order:
             return URL(string: "http://farmyou.localhost/api/order")
         case .delivery:
-            return URL(string: "http://farmyou.localhost/api/delivery")
+            return URL(string: "")
         case .category:
             return URL(string: "http://farmyou.localhost/api/category")
+        case .login:
+            return URL(string: "http://farmyou.localhost/api/login")
+        case .register:
+            return URL(string: "http://farmyou.localhost/api/register")
+        }
+    }
+    
+    var post: URL? {
+        switch self {
+        //TODO: - Заменить URL с деплоя
+        case .product:
+            return URL(string: "farmyou.localhost/api/product")
+        case .order:
+            return URL(string: "")
+        case .delivery:
+            return URL(string: "")
+        case .category:
+            return URL(string: "")
+        case .login:
+            return URL(string: "http://farmyou.localhost/api/login")
+        case .register:
+            return URL(string: "http://farmyou.localhost/api/register")
         }
     }
 }
@@ -65,16 +96,16 @@ final class NetworkManager {
             }
     }
     
-    func fetchPost<T: Codable>(_ type: T.Type, to url: String, with data: T, completion: @escaping(Result<T, AFError>) -> Void) {
+    func sendPostRequest(to url: URL?, with data: ProductAdapter) {
+        guard let url = url else {
+            return
+        }
+        
         AF.request(url, method: .post, parameters: data)
             .validate()
-            .responseDecodable(of: T.self) { responseData in
-                switch responseData.result {
-                case .success(let data):
-                    completion(.success(data))
-                case .failure(let error):
-                    completion(.failure(error))
-                }
+            .responseString { response in
+                print(response)
             }
     }
+    
 }

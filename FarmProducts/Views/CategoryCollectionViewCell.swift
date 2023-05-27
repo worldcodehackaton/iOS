@@ -16,9 +16,9 @@ class CategoryCollectionViewCell: UICollectionViewCell {
     
     @IBOutlet weak var categoryNameLabel: UILabel!
     
-    func configure(with category: Category) {
+    func configure(with category: CategoryData) {
         categoryImageView.image = UIImage(named: "vegetables")
-        categoryNameLabel.text = category.name
+        categoryNameLabel.text = "Empty"
     }
     
 }

@@ -7,12 +7,13 @@
 
 import UIKit
 
-class TabBarViewController: UITabBarController {
+final class TabBarViewController: UITabBarController {
 
     // MARK: - Public properties
     var user: User!
     
-    var categories: [Category] = []
+    var categories: [Category]!
+    var orders: [OrderData] = []
     
     // MARK: - Private properties
     private let networkManager = NetworkManager.shared
@@ -20,37 +21,33 @@ class TabBarViewController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         print(user.email)
+
         transferData()
     }
     
     // MARK: - Prepare with screens
     private func transferData() {
         guard let viewControllers else { return }
-        fetchCategories()
         
         viewControllers.forEach { viewController in
             if let navigationVC = viewController as? UINavigationController {
                 let categoriesVC = navigationVC.topViewController
-                if let categoriesVC = categoriesVC as? CategoryCollectionViewController {
+                if let categoriesVC = categoriesVC as? CategoriesTableViewController {
+                    categoriesVC.categories = categories
                     categoriesVC.user = user
                 } else if let categoriesVC = categoriesVC as? OrdersTableViewController {
-                    categoriesVC.orders = Order.getOrder()
+                    print("Im here")
+//                    print(orders)
+                    categoriesVC.orders = orders
                 }
+            } else if let addProductVC = viewController as? AddProductViewController {
+                addProductVC.storeId = user.id
+                addProductVC.categories = categories
             }
         }
     }
     
     // MARK: - Fetch func 
-    private func fetchCategories() {
-        networkManager.fetch([Category].self, from: Link.category.url) { [weak self] result in
-            switch result {
-            case .success(let data):
-                print(data)
-                self?.categories = data
-            case .failure(let failure):
-                print(failure)
-            }
-        }
-    }
+
     
 }

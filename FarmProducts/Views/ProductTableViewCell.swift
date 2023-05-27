@@ -23,7 +23,7 @@ class ProductTableViewCell: UITableViewCell {
         descriptionLabel.text = product.description
         priceLabel.text = product.priceDescription
         
-        productImageView.image = UIImage(named: "fish")
+        productImageView.image = UIImage(named: "zlak")
     }
 
 }

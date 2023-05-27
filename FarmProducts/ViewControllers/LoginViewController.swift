@@ -7,22 +7,31 @@
 
 import UIKit
 
-class LoginViewController: UIViewController {
+final class LoginViewController: UIViewController {
     
     // MARK: - Temp Data
-
     let user = User.getTempData()
+    var categories: [Category] = []
+    var orders: [OrderData] = []
+    
+    private let networkManager = NetworkManager.shared
     
     // MARK: - IBOutlets
     @IBOutlet var emailTF: UITextField!
     @IBOutlet var passwordTF: UITextField!
     
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        fetchCategories()
+        fetchOrder()
+    }
+    
     // MARK: - IBActions
     @IBAction func loginBtnClick() {
         guard emailTF.text == user.email, passwordTF.text == user.password else {
             showAlert(
-                title: "Invalid login or password",
-                message: "Please, enter correct login or password",
+                title: "Неправильный логин или пароль",
+                message: "Пожалуйста, укажите правильный лог/пароль",
                 textField: passwordTF
             )
             return
@@ -30,13 +39,19 @@ class LoginViewController: UIViewController {
     }
     
     @IBAction func forgotBtnClick() {
-        showAlert(title: "Your Password", message: user.password)
+        showAlert(title: "Ваш пароль ", message: user.password)
+    }
+    
+    
+    @IBAction func registerButtonClick() {
+        
     }
     
     // MARK: - Prepare
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         guard let tabBarVC = segue.destination as? TabBarViewController else { return }
         tabBarVC.user = user
+        tabBarVC.categories = categories
     }
     
 }
@@ -54,5 +69,29 @@ extension LoginViewController {
         }
         alert.addAction(alertOkAction)
         present(alert, animated: true)
+    }
+}
+
+extension LoginViewController {
+    private func fetchCategories() {
+        networkManager.fetch(CategoryData.self, from: Link.category.url) { [weak self] result in
+            switch result {
+            case .success(let data):
+                self?.categories = data.data
+            case .failure(let error):
+                print(error)
+            }
+        }
+    }
+    
+    private func fetchOrder() {
+        networkManager.fetch(Order.self, from: Link.order.url) { [weak self] result in
+            switch result {
+            case .success(let order):
+                self?.orders = order.data
+            case .failure(let error):
+                print(error)
+            }
+        }
     }
 }
